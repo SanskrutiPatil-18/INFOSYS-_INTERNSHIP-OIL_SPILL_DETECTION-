@@ -11,6 +11,7 @@ A deep learning application that detects marine oil spills from SAR satellite im
 - [Overview](#overview)
 - [Key Features](#key-features)
 - [Dataset](#dataset)
+- [Data Preprocessing & Augmentation](#data-preprocessing--augmentation)
 - [Model Architecture](#model-architecture)
 - [Installation](#installation)
 - [MongoDB Setup](#mongodb-setup)
@@ -22,6 +23,7 @@ A deep learning application that detects marine oil spills from SAR satellite im
 - [Results](#results)
 - [Future Enhancements](#future-enhancements)
 - [Author](#author)
+
 
 ---
 
@@ -65,6 +67,93 @@ Splits:
 Train 70% | Val 20% | Test 10%
 
 ---
+
+## 🧹 Data Preprocessing & Augmentation
+
+To ensure the model learns robust oil spill features and generalizes well in real-world conditions, several preprocessing + augmentation operations are applied:
+
+### ✅ Preprocessing
+
+| Step                     | Description                                                            |
+| ------------------------ | ---------------------------------------------------------------------- |
+| **Resizing**             | All images + masks resized to `(256 × 256)` for uniform batch training |
+| **Normalization**        | Pixel values scaled from `0-255 → 0-1`                                 |
+| **Mask binarization**    | Ground-truth masks converted to binary (0: water, 1: oil spill)        |
+| **Train/Val/Test split** | Dataset divided using 70/20/10 ratio                                   |
+
+> These operations ensure stable training and proper pixel-wise segmentation output.
+
+---
+
+### 🎯 Data Augmentation
+
+Oil spills in water occur in varied environments, lighting, and angles — so augmentations improve robustness and reduce overfitting.
+
+| Augmentation                                     | Why it helps                                           |
+| ------------------------------------------------ | ------------------------------------------------------ |
+| **Horizontal & Vertical Flip**                   | Oil pattern symmetry — improves spatial generalization |
+| **Random Rotations (0°–270°)**                   | Drone view angle changes                               |
+| **Random Zoom & Cropping**                       | Simulates different altitude & spill scale variations  |
+| **Brightness, Contrast, Saturation Adjustments** | Different lighting + water reflections                 |
+| **Small Random Noise** *(optional)*              | Makes model resilient to camera noise                  |
+
+Used safely with segmentation masks (masks are transformed identically ✅).
+
+---
+
+### 🔧 Augmentation Pipeline
+
+```python
+def augment_image_mask(image, mask):
+    image = tf.cast(image, tf.float32) / 255.0
+    mask  = tf.cast(mask > 0, tf.float32)
+
+    # Random flip
+    if tf.random.uniform(()) > 0.5:
+        image = tf.image.flip_left_right(image)
+        mask  = tf.image.flip_left_right(mask)
+    if tf.random.uniform(()) > 0.5:
+        image = tf.image.flip_up_down(image)
+        mask  = tf.image.flip_up_down(mask)
+
+    # Random rotation
+    k = tf.random.uniform([], minval=0, maxval=4, dtype=tf.int32)
+    image = tf.image.rot90(image, k)
+    mask  = tf.image.rot90(mask, k)
+
+    # Random zoom
+    if tf.random.uniform(()) > 0.5:
+        scale = tf.random.uniform([], 0.85, 1.0)
+        h, w, _ = image.shape
+        ch, cw = int(scale * h), int(scale * w)
+        image = tf.image.resize_with_crop_or_pad(image, ch, cw)
+        mask  = tf.image.resize_with_crop_or_pad(mask, ch, cw)
+        image = tf.image.resize(image, (256, 256))
+        mask  = tf.image.resize(mask, (256, 256), method="nearest")
+
+    # Color jitter (image only)
+    image = tf.image.random_brightness(image, 0.05)
+    image = tf.image.random_contrast(image, 0.9, 1.1)
+    image = tf.image.random_saturation(image, 0.9, 1.1)
+
+    return image, mask
+```
+
+---
+
+### 📌 Final Train Pipeline
+
+```python
+train_ds = train_ds.map(lambda x, y: augment_image_mask(x, y))
+train_ds = train_ds.batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
+```
+
+✅ Ensures GPU utilization is efficient <br>
+✅ Prevents model memorization <br>
+✅ Boosts segmentation performance <br>
+
+---
+
 
 ## 🧠 Model Architecture — U-Net
 Designed for biomedical & geospatial segmentation:
