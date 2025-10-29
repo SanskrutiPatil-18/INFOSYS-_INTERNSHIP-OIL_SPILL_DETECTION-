@@ -187,7 +187,7 @@ pip install -r requirements.txt
 
 ## 🍃 MongoDB Setup
 
-1️⃣ Create MongoDB Atlas cluster
+1️⃣ Create MongoDB Atlas cluster<br>
 2️⃣ Get connection string:
 
 ```
@@ -305,7 +305,7 @@ Oil Spill Detection/
 | ----------------- | ------ |
 | Dice              | ~0.90  |
 | IoU               | ~0.86  |
-| Accuracy          | ~92%   |
+| Accuracy          | ~90%   |
 | Boundary Accuracy | High ✅ |
 | False Positives   | Low ✅  |
 
