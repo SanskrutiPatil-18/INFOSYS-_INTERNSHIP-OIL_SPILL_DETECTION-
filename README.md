@@ -143,19 +143,21 @@ Web UI Features:<br>
 
 ## 📊 Evaluation & Visualizations
 
-✅ Loss / accuracy curves
-![](assets/results/overlay.png)
-✅ Dice & IoU improvements
-![](assets/results/dice_iou.png)
-✅ Threshold optimization
-![](assets/results/threshold.png)
-✅ Confidence Map
-![](assets/results/confidence.png)
-✅ Pixel Distribution
-![](assets/results/pixeldist.png)
+✅ ROC curve<br>
+![](assets/results/roc.png)<br>
+✅ Precision Recall curve<br>
+![](assets/results/prcurve.png)<br>
+✅ Dice & IoU improvements<br>
+![](assets/results/dice_iou.png)<br>
+✅ Threshold optimization<br>
+![](assets/results/threshold.png)<br>
+✅ Confidence Map<br>
+![](assets/results/confidence.png)<br>
+✅ Pixel Distribution<br>
+![](assets/results/pixeldist.png)<br>
 
 
-Example Output:
+📊 Example Output:
 ![](assets/results/overlay.png)
 
 ---
