@@ -1,0 +1,7 @@
+streamlit
+tensorflow
+pillow
+numpy
+pymongo
+python-dotenv
+gdown
